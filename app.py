@@ -1,27 +1,17 @@
 import instaloader
 import threading
-import tkinter as tk
-from tkinter import messagebox
+import PySimpleGUI as sg
+from pathlib import Path
 
 # Create an instance of Instaloader class
 L = instaloader.Instaloader()
 
-# Create GUI window
-root = tk.Tk()
-root.title("Instagram Reel Downloader")
-
 # Define function to download reel
-def download_reels():
-    reel_urls = url_entry.get("1.0", "end-1c").split("\n")
-    threads = []
+def download_reels(values):
+    reel_urls = values['-URLS-'].split('\n')
     for url in reel_urls:
         t = threading.Thread(target=download_reel, args=(url,))
         t.start()
-        threads.append(t)
-    for t in threads:
-        t.join()
-
-    messagebox.showinfo("Success", "All reels downloaded successfully.")
 
 def download_reel(reel_url):
     try:
@@ -30,14 +20,22 @@ def download_reel(reel_url):
     except Exception as e:
         print(f"Error downloading reel: {e}")
 
-# Create GUI elements
-url_label = tk.Label(root, text="Enter Instagram Reel URLs (one URL per line):")
-url_entry = tk.Text(root, width=50, height=10)
-download_button = tk.Button(root, text="Download Reels", command=download_reels)
+# Define GUI layout
+layout = [[sg.Text('Enter Instagram Reel URLs (one URL per line):')],
+          [sg.Multiline(size=(50, 10), key='-URLS-')],
+          [sg.Button('Download Reels'), sg.Button('Exit')]]
 
-# Add GUI elements to window
-url_label.pack()
-url_entry.pack()
-download_button.pack()
+# Create GUI window
+window = sg.Window('Instagram Reel Downloader', layout)
 
-root.mainloop()
+# Event loop to process "Download Reels" and "Exit" buttons
+while True:
+    event, values = window.read()
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        break
+    elif event == 'Download Reels':
+        download_reels(values)
+        sg.Popup('Success', 'All reels downloaded successfully.')
+
+# Close GUI window
+window.close()
