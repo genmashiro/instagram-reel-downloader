@@ -12,7 +12,7 @@ git clone https://github.com/oxygenta/instagram-reel-downloader.git
 ```
 2. Install the required dependencies using pip.
 ```
-pip install instaloader tkinter
+pip install instaloader pysimplegui
 ```
 
 ## Usage
