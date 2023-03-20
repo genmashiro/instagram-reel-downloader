@@ -1,3 +1,5 @@
+import os
+import glob
 import instaloader
 import concurrent.futures
 import PySimpleGUI as sg
@@ -11,6 +13,12 @@ def download_reel(reel_url):
     try:
         post = instaloader.Post.from_shortcode(L.context, reel_url.split("/")[-2])
         L.download_post(post, target=post.owner_username)
+
+        # Delete all files except .mp4 in the post.owner_username directory
+        for file in glob.glob(f"{post.owner_username}/*"):
+            if not file.endswith('.mp4'):
+                os.remove(file)
+
         return True
     except Exception as e:
         print(f"Error downloading reel: {e}")
