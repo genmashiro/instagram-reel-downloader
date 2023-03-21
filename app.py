@@ -1,9 +1,8 @@
-import os
-import glob
 import instaloader
 import concurrent.futures
 import PySimpleGUI as sg
 from pathlib import Path
+
 
 # Create an instance of Instaloader class
 L = instaloader.Instaloader()
@@ -12,12 +11,12 @@ L = instaloader.Instaloader()
 def download_reel(reel_url):
     try:
         post = instaloader.Post.from_shortcode(L.context, reel_url.split("/")[-2])
-        L.download_post(post, target=post.owner_username)
+        L.download_post(post, target=str(Path(post.owner_username)))
 
         # Delete all files except .mp4 in the post.owner_username directory
-        for file in glob.glob(f"{post.owner_username}/*"):
-            if not file.endswith('.mp4'):
-                os.remove(file)
+        for file in Path(post.owner_username).glob('*'):
+            if not file.name.endswith('.mp4'):
+                file.unlink()
 
         return True
     except Exception as e:
@@ -27,8 +26,7 @@ def download_reel(reel_url):
 def download_reels(values):
     reel_urls = values['-URLS-'].split('\n')
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        futures = [executor.submit(download_reel, url) for url in reel_urls]
-        results = [future.result() for future in futures]
+        results = list(executor.map(download_reel, reel_urls))
 
     if all(results):
         sg.Popup('Success', 'All reels downloaded successfully.')
